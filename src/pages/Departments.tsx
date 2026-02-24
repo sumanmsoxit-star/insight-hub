@@ -2,6 +2,7 @@ import { AppLayout } from "@/components/AppLayout";
 import { getDepartmentStats } from "@/lib/data";
 import { motion } from "framer-motion";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, RadarChart, PolarGrid, PolarAngleAxis, PolarRadiusAxis, Radar } from "recharts";
+import { ExportButtons } from "@/components/ExportButtons";
 
 export default function Departments() {
   const stats = getDepartmentStats();
@@ -14,8 +15,19 @@ export default function Departments() {
     "Avg Pkg (×5)": d.avgPackage * 5,
   }));
 
+  const exportData = stats.map(d => ({
+    Department_ID: d.id, Department_Name: d.name, Students: d.students, Faculty: d.faculty,
+    Avg_CGPA: d.avgCGPA, Placement_Percent: Math.min(d.placementPercent, 100),
+    Avg_Package_LPA: d.avgPackage, Attendance_Percent: d.attendancePercent,
+    Revenue: d.revenue,
+  }));
+
   return (
     <AppLayout title="Departments" subtitle="Comparative performance across 4 departments">
+      <div className="flex justify-end mb-4">
+        <ExportButtons data={exportData} filename="department_stats" sheetName="Departments" />
+      </div>
+
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
         {stats.map((d, i) => (
           <motion.div key={d.id} initial={{ opacity: 0, y: 12 }} animate={{ opacity: 1, y: 0 }} transition={{ delay: i * 0.1 }} className="glass-card rounded-lg border border-border p-5">

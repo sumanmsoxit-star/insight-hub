@@ -2,8 +2,9 @@ import { AppLayout } from "@/components/AppLayout";
 import { getCGPADistribution, getStudents, getDepartmentStats } from "@/lib/data";
 import { KPICard } from "@/components/KPICard";
 import { BarChart3, Award, AlertTriangle, BookOpen } from "lucide-react";
-import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
+import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from "recharts";
 import { useMemo } from "react";
+import { ExportButtons } from "@/components/ExportButtons";
 
 export default function Academics() {
   const cgpaData = getCGPADistribution();
@@ -16,6 +17,16 @@ export default function Academics() {
 
   const deptCGPA = deptStats.map(d => ({ name: d.id, avgCGPA: d.avgCGPA }));
 
+  const topExport = topPerformers.map((s, i) => ({
+    Rank: i + 1, Student_ID: s.id, Name: s.name, Department: s.departmentId,
+    Semester: s.semester, CGPA: s.cgpa, Attendance: s.attendancePercent,
+  }));
+
+  const allAcademicExport = students.map(s => ({
+    Student_ID: s.id, Name: s.name, Department: s.departmentId, Semester: s.semester,
+    CGPA: s.cgpa, Attendance: s.attendancePercent, Status: s.status,
+  }));
+
   return (
     <AppLayout title="Academic Performance" subtitle="CGPA analytics, top performers, and department comparison">
       <div className="data-grid mb-6">
@@ -23,6 +34,10 @@ export default function Academics() {
         <KPICard title="Top CGPA" value={Math.max(...students.map(s => s.cgpa)).toFixed(2)} icon={<Award className="w-4 h-4" />} variant="success" />
         <KPICard title="Below 5.0" value={students.filter(s => s.cgpa < 5).length} icon={<AlertTriangle className="w-4 h-4" />} variant="danger" />
         <KPICard title="Above 8.0" value={students.filter(s => s.cgpa >= 8).length} icon={<BookOpen className="w-4 h-4" />} variant="success" />
+      </div>
+
+      <div className="flex justify-end mb-4">
+        <ExportButtons data={allAcademicExport} filename="academic_performance" sheetName="Academics" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
@@ -54,7 +69,10 @@ export default function Academics() {
       </div>
 
       <div className="glass-card rounded-lg border border-border p-5">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Top 10 Performers</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Top 10 Performers</h3>
+          <ExportButtons data={topExport} filename="top_performers" sheetName="TopPerformers" />
+        </div>
         <table className="w-full text-xs">
           <thead>
             <tr className="border-b border-border">

@@ -3,9 +3,9 @@ import { AppLayout } from "@/components/AppLayout";
 import { getStudents, getDepartments, type Student } from "@/lib/data";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Badge } from "@/components/ui/badge";
 import { Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { ExportButtons } from "@/components/ExportButtons";
 
 const PAGE_SIZE = 25;
 
@@ -36,10 +36,18 @@ export default function Students() {
   const paged = filtered.slice(page * PAGE_SIZE, (page + 1) * PAGE_SIZE);
   const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
 
+  const exportData = filtered.map(s => ({
+    Student_ID: s.id, Roll_Number: s.rollNumber, Name: s.name, Gender: s.gender, DOB: s.dob,
+    Category: s.category, Department: s.departmentId, Semester: s.semester, Section: s.section,
+    Status: s.status, Admission_Year: s.admissionYear, CGPA: s.cgpa, Attendance: s.attendancePercent,
+    Guardian: s.guardianName, Guardian_Contact: s.guardianContact,
+    Fees_Paid: s.feesPaid, Total_Fees: s.totalFees,
+  }));
+
   return (
     <AppLayout title="Student Management" subtitle={`${filtered.length.toLocaleString()} students`}>
       {/* Filters */}
-      <div className="flex flex-wrap gap-3 mb-5">
+      <div className="flex flex-wrap gap-3 mb-5 items-center">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Search by name, ID or roll number..." className="pl-9 bg-card border-border" value={search} onChange={e => { setSearch(e.target.value); setPage(0); }} />
@@ -60,6 +68,7 @@ export default function Students() {
             <SelectItem value="Dropout">Dropout</SelectItem>
           </SelectContent>
         </Select>
+        <ExportButtons data={exportData} filename="students_data" sheetName="Students" />
       </div>
 
       <div className="flex gap-5">

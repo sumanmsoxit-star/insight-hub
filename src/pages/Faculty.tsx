@@ -5,6 +5,7 @@ import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Search } from "lucide-react";
 import { motion } from "framer-motion";
+import { ExportButtons } from "@/components/ExportButtons";
 
 export default function Faculty() {
   const allFaculty = useMemo(() => getFaculty(), []);
@@ -20,9 +21,14 @@ export default function Faculty() {
     });
   }, [allFaculty, search, deptFilter]);
 
+  const exportData = filtered.map(f => ({
+    Faculty_ID: f.id, Name: f.name, Qualification: f.qualification, Experience_Years: f.experience,
+    Department: f.departmentId, Designation: f.designation, Email: f.email, Phone: f.phone, Publications: f.publications,
+  }));
+
   return (
     <AppLayout title="Faculty Management" subtitle={`${filtered.length} faculty members`}>
-      <div className="flex flex-wrap gap-3 mb-5">
+      <div className="flex flex-wrap gap-3 mb-5 items-center">
         <div className="relative flex-1 min-w-[200px] max-w-sm">
           <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
           <Input placeholder="Search faculty..." className="pl-9 bg-card border-border" value={search} onChange={e => setSearch(e.target.value)} />
@@ -34,6 +40,7 @@ export default function Faculty() {
             {departments.map(d => <SelectItem key={d.id} value={d.id}>{d.name}</SelectItem>)}
           </SelectContent>
         </Select>
+        <ExportButtons data={exportData} filename="faculty_data" sheetName="Faculty" />
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">

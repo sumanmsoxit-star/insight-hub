@@ -11,6 +11,7 @@ import {
   Building2,
   ChevronLeft,
   ChevronRight,
+  FileText,
 } from "lucide-react";
 import { useState } from "react";
 
@@ -23,6 +24,7 @@ const navItems = [
   { path: "/attendance", label: "Attendance", icon: Calendar },
   { path: "/finance", label: "Finance", icon: DollarSign },
   { path: "/placements", label: "Placements", icon: Briefcase },
+  { path: "/documentation", label: "Documentation", icon: FileText },
 ];
 
 export function AppSidebar() {

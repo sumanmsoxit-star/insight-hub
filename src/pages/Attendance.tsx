@@ -4,6 +4,7 @@ import { KPICard } from "@/components/KPICard";
 import { Calendar, AlertTriangle, Users, BarChart3 } from "lucide-react";
 import { LineChart, Line, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend } from "recharts";
 import { useMemo } from "react";
+import { ExportButtons } from "@/components/ExportButtons";
 
 const DEPT_COLORS: Record<string, string> = {
   CSE: "hsl(187,72%,50%)",
@@ -18,6 +19,13 @@ export default function Attendance() {
   const defaulters = students.filter(s => s.attendancePercent < 75);
   const departments = getDepartments();
 
+  const defaulterExport = defaulters.map(s => ({
+    Student_ID: s.id, Name: s.name, Department: s.departmentId, Semester: s.semester,
+    Attendance_Percent: s.attendancePercent, CGPA: s.cgpa, Status: s.status,
+  }));
+
+  const monthlyExport = monthlyData.map(m => ({ Month: m.month, ...Object.fromEntries(departments.map(d => [d.name, (m as any)[d.id]])) }));
+
   return (
     <AppLayout title="Attendance Analytics" subtitle="Monthly tracking and defaulter detection">
       <div className="data-grid mb-6">
@@ -28,7 +36,10 @@ export default function Attendance() {
       </div>
 
       <div className="glass-card rounded-lg border border-border p-5 mb-6">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Monthly Attendance by Department (2026)</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Monthly Attendance by Department (2026)</h3>
+          <ExportButtons data={monthlyExport} filename="monthly_attendance" sheetName="Monthly" />
+        </div>
         <ResponsiveContainer width="100%" height={320}>
           <LineChart data={monthlyData}>
             <CartesianGrid strokeDasharray="3 3" stroke="hsl(222,30%,16%)" />
@@ -44,7 +55,10 @@ export default function Attendance() {
       </div>
 
       <div className="glass-card rounded-lg border border-border p-5">
-        <h3 className="text-sm font-semibold text-foreground mb-4">Attendance Defaulters ({defaulters.length} students below 75%)</h3>
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="text-sm font-semibold text-foreground">Attendance Defaulters ({defaulters.length} students below 75%)</h3>
+          <ExportButtons data={defaulterExport} filename="attendance_defaulters" sheetName="Defaulters" />
+        </div>
         <div className="overflow-x-auto max-h-96">
           <table className="w-full text-xs">
             <thead className="sticky top-0 bg-card">
