@@ -11,6 +11,7 @@ import Academics from "./pages/Academics";
 import Attendance from "./pages/Attendance";
 import Finance from "./pages/Finance";
 import Placements from "./pages/Placements";
+import Documentation from "./pages/Documentation";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -30,6 +31,7 @@ const App = () => (
           <Route path="/attendance" element={<Attendance />} />
           <Route path="/finance" element={<Finance />} />
           <Route path="/placements" element={<Placements />} />
+          <Route path="/documentation" element={<Documentation />} />
           <Route path="*" element={<NotFound />} />
         </Routes>
       </BrowserRouter>

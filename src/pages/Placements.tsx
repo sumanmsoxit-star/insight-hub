@@ -4,6 +4,7 @@ import { KPICard } from "@/components/KPICard";
 import { Briefcase, TrendingUp, Building2, Target } from "lucide-react";
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, LineChart, Line, Legend, PieChart, Pie, Cell } from "recharts";
 import { useMemo } from "react";
+import { ExportButtons } from "@/components/ExportButtons";
 
 const COLORS = ["hsl(187,72%,50%)", "hsl(152,60%,45%)", "hsl(38,92%,55%)", "hsl(280,65%,60%)", "hsl(0,72%,55%)", "hsl(210,80%,55%)", "hsl(320,70%,55%)", "hsl(160,50%,50%)", "hsl(45,80%,50%)", "hsl(200,60%,50%)", "hsl(260,55%,55%)", "hsl(10,65%,50%)"];
 
@@ -23,6 +24,12 @@ export default function Placements() {
     { name: "Non-Core", value: current.filter(p => !p.isCore).length },
   ];
 
+  const placementExport = placements.map(p => ({
+    Student_ID: p.studentId, Student_Name: p.studentName, Department: p.departmentId,
+    Company: p.companyName, Package_LPA: p.packageLPA, Year: p.year,
+    Core_Placement: p.isCore ? "Yes" : "No", Higher_Studies: p.higherStudies ? "Yes" : "No",
+  }));
+
   return (
     <AppLayout title="Placement Analytics" subtitle="5-year placement trends and company distribution">
       <div className="data-grid mb-6">
@@ -30,6 +37,10 @@ export default function Placements() {
         <KPICard title="Avg Package" value={`₹${(current.reduce((a, p) => a + p.packageLPA, 0) / (current.length || 1)).toFixed(1)} LPA`} icon={<TrendingUp className="w-4 h-4" />} variant="success" trend="up" trendValue="+8%" />
         <KPICard title="Highest Package" value={`₹${Math.max(...current.map(p => p.packageLPA)).toFixed(1)} LPA`} icon={<Target className="w-4 h-4" />} variant="primary" />
         <KPICard title="Companies" value={new Set(current.map(p => p.companyName)).size} icon={<Building2 className="w-4 h-4" />} variant="default" />
+      </div>
+
+      <div className="flex justify-end mb-4">
+        <ExportButtons data={placementExport} filename="placement_data" sheetName="Placements" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">

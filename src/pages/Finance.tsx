@@ -1,9 +1,10 @@
 import { AppLayout } from "@/components/AppLayout";
 import { getKPIs, getRevenueTrend, getStudents } from "@/lib/data";
 import { KPICard } from "@/components/KPICard";
-import { DollarSign, TrendingUp, Users, Award } from "lucide-react";
+import { DollarSign, TrendingUp, Award } from "lucide-react";
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, Legend, BarChart, Bar } from "recharts";
 import { useMemo } from "react";
+import { ExportButtons } from "@/components/ExportButtons";
 
 export default function Finance() {
   const kpis = getKPIs();
@@ -29,6 +30,16 @@ export default function Finance() {
     }));
   }, [students]);
 
+  const feeExport = students.map(s => ({
+    Student_ID: s.id, Name: s.name, Department: s.departmentId, Total_Fees: s.totalFees,
+    Fees_Paid: s.feesPaid, Outstanding: s.totalFees - s.feesPaid,
+    Payment_Percent: `${((s.feesPaid / s.totalFees) * 100).toFixed(1)}%`,
+  }));
+
+  const revenueExport = revenue.map(r => ({
+    Year: r.year, Collected: r.collected, Outstanding: r.outstanding,
+  }));
+
   return (
     <AppLayout title="Financial Analytics" subtitle="Revenue tracking, fee management, and scholarship analytics">
       <div className="data-grid mb-6">
@@ -36,6 +47,10 @@ export default function Finance() {
         <KPICard title="Collection Rate" value={`${kpis.revenuePercent}%`} icon={<TrendingUp className="w-4 h-4" />} variant="primary" />
         <KPICard title="Outstanding" value={`₹${((students.reduce((a, s) => a + s.totalFees - s.feesPaid, 0)) / 10000000).toFixed(1)}Cr`} icon={<DollarSign className="w-4 h-4" />} variant="warning" />
         <KPICard title="Scholarships" value={kpis.scholarshipStudents} subtitle="~12% of active students" icon={<Award className="w-4 h-4" />} variant="default" />
+      </div>
+
+      <div className="flex justify-end mb-4">
+        <ExportButtons data={feeExport} filename="financial_data" sheetName="Fees" />
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">

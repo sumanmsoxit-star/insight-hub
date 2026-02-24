@@ -8,6 +8,8 @@ import {
   getMonthlyAttendance,
   getRevenueTrend,
 } from "@/lib/data";
+import { exportMultiSheetExcel } from "@/lib/export";
+import { ExportButtons } from "@/components/ExportButtons";
 import {
   GraduationCap,
   Users,
@@ -17,6 +19,7 @@ import {
   BarChart3,
   Target,
   UserX,
+  FileSpreadsheet,
 } from "lucide-react";
 import {
   BarChart,
@@ -46,14 +49,17 @@ const CHART_COLORS = [
   "hsl(210, 80%, 55%)",
 ];
 
-const ChartCard = ({ title, children, className = "" }: { title: string; children: React.ReactNode; className?: string }) => (
+const ChartCard = ({ title, children, className = "", actions }: { title: string; children: React.ReactNode; className?: string; actions?: React.ReactNode }) => (
   <motion.div
     initial={{ opacity: 0, y: 16 }}
     animate={{ opacity: 1, y: 0 }}
     transition={{ duration: 0.5 }}
     className={`glass-card rounded-lg p-5 border border-border ${className}`}
   >
-    <h3 className="text-sm font-semibold text-foreground mb-4">{title}</h3>
+    <div className="flex items-center justify-between mb-4">
+      <h3 className="text-sm font-semibold text-foreground">{title}</h3>
+      {actions}
+    </div>
     {children}
   </motion.div>
 );
@@ -82,8 +88,34 @@ export default function Dashboard() {
 
   const deptPie = deptStats.map(d => ({ name: d.id, value: d.students }));
 
+  const deptExport = deptStats.map(d => ({
+    Department: d.name, Students: d.students, Faculty: d.faculty,
+    Avg_CGPA: d.avgCGPA, Placement_Percent: Math.min(d.placementPercent, 100),
+    Avg_Package: d.avgPackage, Attendance: d.attendancePercent,
+  }));
+
+  const handleFullExport = () => {
+    exportMultiSheetExcel([
+      { name: "Department Summary", data: deptExport },
+      { name: "CGPA Distribution", data: cgpa },
+      { name: "Placement Trend", data: placements },
+      { name: "Revenue Trend", data: revenue },
+    ], "dashboard_complete_export");
+  };
+
   return (
     <AppLayout title="Institutional Dashboard" subtitle="Real-time analytics for 3000+ students across 4 departments • AY 2025–26">
+      {/* Export All */}
+      <div className="flex justify-end mb-4">
+        <button
+          onClick={handleFullExport}
+          className="inline-flex items-center gap-1.5 px-4 py-2 rounded-md text-xs font-medium bg-primary/15 text-primary hover:bg-primary/25 transition-colors border border-primary/30"
+        >
+          <FileSpreadsheet className="w-4 h-4" />
+          Export All Dashboard Data (Excel)
+        </button>
+      </div>
+
       {/* KPI Row */}
       <div className="data-grid mb-6">
         <KPICard title="Total Students" value={kpis.totalStudents.toLocaleString()} subtitle={`${kpis.activeStudents} active`} icon={<GraduationCap className="w-4 h-4" />} variant="primary" trend="up" trendValue="+8.2%" />
@@ -98,7 +130,7 @@ export default function Dashboard() {
 
       {/* Charts Row 1 */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5 mb-6">
-        <ChartCard title="CGPA Distribution">
+        <ChartCard title="CGPA Distribution" actions={<ExportButtons data={cgpa} filename="cgpa_distribution" sheetName="CGPA" />}>
           <ResponsiveContainer width="100%" height={260}>
             <BarChart data={cgpa}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 16%)" />
@@ -110,7 +142,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Placement Trends (5-Year)">
+        <ChartCard title="Placement Trends (5-Year)" actions={<ExportButtons data={placements} filename="placement_trend" sheetName="Placements" />}>
           <ResponsiveContainer width="100%" height={260}>
             <LineChart data={placements}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 16%)" />
@@ -141,7 +173,7 @@ export default function Dashboard() {
           </ResponsiveContainer>
         </ChartCard>
 
-        <ChartCard title="Revenue Trend (₹ Cr)" className="lg:col-span-2">
+        <ChartCard title="Revenue Trend (₹ Cr)" className="lg:col-span-2" actions={<ExportButtons data={revenue} filename="revenue_trend" sheetName="Revenue" />}>
           <ResponsiveContainer width="100%" height={240}>
             <AreaChart data={revenue}>
               <CartesianGrid strokeDasharray="3 3" stroke="hsl(222, 30%, 16%)" />
@@ -157,7 +189,7 @@ export default function Dashboard() {
       </div>
 
       {/* Department Summary Table */}
-      <ChartCard title="Department Performance Summary">
+      <ChartCard title="Department Performance Summary" actions={<ExportButtons data={deptExport} filename="department_summary" sheetName="Departments" />}>
         <div className="overflow-x-auto">
           <table className="w-full text-xs">
             <thead>
